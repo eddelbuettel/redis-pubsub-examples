@@ -1,13 +1,16 @@
 #!/usr/bin/env r
 
 suppressMessages({
+    library(docopt)
     library(quantmod)
     library(RcppRedis)
 })
 
-subsymbol <- "ES=F" 					# Yahoo! symbol
-pubsymbol <- "ES1"
-defaultTZ <- "America/Chicago"
+msg <- function(ts, ...) {
+    op <- options(digits.secs=3)
+    cat(format(ts), ..., "\n")
+    options(op)
+}
 
 get_data <- function(symbol, tz=defaultTZ) {
     quote <- getQuote(symbol)
@@ -31,8 +34,8 @@ publish_data <- function(vec, redis, symbol) {
     }
 }
 
-intraday <- function(symbol = "^GSPC",
-                     defaultTZ = "America/Chicago") {
+intraday <- function(subsymbol = "^GSPC", pubsymbol = "SP500",
+                     sleepdelay = 10, defaultTZ = "America/Chicago") {
 
     redis <- new(Redis, "localhost")
     if (redis$ping() != "PONG") stop("No Redis server?", call. = FALSE)
@@ -43,7 +46,7 @@ intraday <- function(symbol = "^GSPC",
         curr_t <- Sys.time()
         dat <- try(get_data(subsymbol, defaultTZ), silent = TRUE)
         if (inherits(dat, "try-error")) {
-            msg(curr_t, "Error:", attr(y, "condition")[["message"]])
+            msg(curr_t, "Error:", attr(dat, "condition")[["message"]])
             errored <- TRUE
             Sys.sleep(15)
             next
@@ -54,13 +57,20 @@ intraday <- function(symbol = "^GSPC",
         vol <- Vo(dat)[[1]]
         if (vol > prevvol) {
             publish_data(dat, redis, pubsymbol)
-        } else {
-            #cat("Nope\n")
-            #print(y)
         }
         prevvol <- vol
-        Sys.sleep(30)
+        Sys.sleep(sleepdelay)
     }
 }
 
-intraday()
+doc <- "Usage: publisher.r [--sym SYM] [--pub PUB] [--del SLEEP] [--tz TZ]
+
+Option:
+-s --sym SYM	Yahoo! symbol to queyer [default: ^GSPC]
+-p --pub PUB    Symbol to publish via Redis [default: SP500]
+-d --del SLEEP  Delay (in seconds) to sleep before next query [default: 10]
+-t --tz TZ      Local timezone [default: America/Chicago]
+"
+
+opt <- docopt(doc)
+intraday(opt$sym, opt$pub, as.numeric(opt$del), opt$tz)
