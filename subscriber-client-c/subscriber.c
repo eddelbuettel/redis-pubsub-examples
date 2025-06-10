@@ -171,6 +171,8 @@ int main(int argc, char** argv) {
     const char* redis_host = "127.0.0.1";
     int redis_port = 6379;
 
+    if (argc > 1) symbol = argv[1];
+
     // Start subscription
     return subscribe_to_symbol(symbol, redis_host, redis_port);
 }
