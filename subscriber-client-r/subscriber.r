@@ -1,5 +1,6 @@
 #!/usr/bin/env r
 
+library(docopt)
 library(RcppRedis)
 
 ## Callback handler for convenience
@@ -18,14 +19,19 @@ symbolRedisMonitorChannel <- function(context, type="string") {
 }
 
 
-## Parameters
-symbols <- c("ES1")
-host <- "localhost"
+doc <- "Usage: subscriber.r [--sym SYM] [--host HOST]
 
-redis <- new(Redis, host)
+Options:
+-s --sym SYM   Yahoo! symbol to queyer [default: ^GSPC]
+-r --srv HOST  Redis server to connect to [default: localhost]
+"
+
+opt <- docopt(doc)
+
+redis <- new(Redis, opt$srv)
 if (redis$ping() != "PONG") stop("No Redis server?", call. = FALSE)
 
-res <- sapply(symbols, redis$subscribe)
+res <- sapply(opt$sym, redis$subscribe)
 
 repeat {
     rl <- symbolRedisMonitorChannel(redis, type="string")
