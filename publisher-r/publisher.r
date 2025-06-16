@@ -65,7 +65,7 @@ intraday <- function(subsymbol = "^GSPC", pubsymbol = "SP500",
 
 doc <- "Usage: publisher.r [--sym SYM] [--pub PUB] [--del SLEEP] [--tz TZ]
 
-Option:
+Options:
 -s --sym SYM	Yahoo! symbol to queyer [default: ^GSPC]
 -p --pub PUB    Symbol to publish via Redis [default: SP500]
 -d --del SLEEP  Delay (in seconds) to sleep before next query [default: 10]
