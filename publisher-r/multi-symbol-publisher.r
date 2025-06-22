@@ -30,7 +30,7 @@ publish_data <- function(vec, redis, symbol) {
             txt <- sprintf("%s;%s", row$Time, paste(row[,-(1:2)], collapse=";"))
             symbol <- row$Symbols
             cat(symbol, ":", txt, "\n", sep="")
-            redis$publishText(symbol, txt)
+            redis$publish(symbol, txt, "string")
         }
     }
 }

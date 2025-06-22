@@ -30,7 +30,7 @@ publish_data <- function(vec, redis, symbol) {
                        attr(vec,"pct_change"),
                        attr(vec,"change"))
         cat(symbol, ":", txt, "\n", sep="")
-        redis$publishText(symbol, txt)
+        redis$publish(symbol, txt, "string")
     }
 }
 
