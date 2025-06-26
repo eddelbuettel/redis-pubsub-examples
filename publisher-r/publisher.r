@@ -16,7 +16,8 @@ get_data <- function(symbol, tz=defaultTZ) {
     quote <- getQuote(symbol)
     attr(quote$`Trade Time`, "tzone") <- tz
     quote$Close <- quote$Last
-    xts(OHLCV(quote), quote[,"Trade Time"], pct_change = quote[,"% Change"], change = quote[, "Change"])
+    xts(OHLCV(quote), quote[,"Trade Time"],
+        change = quote[, "Change"], pct_change = quote[,"% Change"])
 }
 
 publish_data <- function(vec, redis, symbol) {
@@ -27,8 +28,8 @@ publish_data <- function(vec, redis, symbol) {
         txt <- sprintf("%s;%s;%f;%f",
                        format(index(vec)),
                        paste(vec, collapse=";"),
-                       attr(vec,"pct_change"),
-                       attr(vec,"change"))
+                       attr(vec,"change"),
+                       attr(vec,"pct_change"))
         cat(symbol, ":", txt, "\n", sep="")
         redis$publish(symbol, txt, "string")
     }

@@ -19,8 +19,8 @@ get_data <- function(symbols, tz=defaultTZ) {
     data.frame(Symbols=symbols,
                Time=quote[,"Trade Time"],
                OHLCV(quote),
-               Pct_Change = quote[,"% Change"],
-               Change = quote[, "Change"])
+               Change = quote[, "Change"],
+               Pct_Change = quote[,"% Change"])
 }
 
 publish_data <- function(vec, redis, symbol) {
